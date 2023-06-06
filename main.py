@@ -1,5 +1,6 @@
 
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -21,13 +22,19 @@ from pprint import pprint
 
 ###############      PARAMETERS       ####################
 
+# path to chrome driver
+with open('webdriver_path_file.json', encoding='utf-8') as fp:
+    webdriver_path = json.load(fp)
+
+webdriver_path = webdriver_path['webdriver_path']
+
 
 
 MAX_PRICE_4rooms = 21000 # implemented in room dependent if statement
 MAX_PRICE_5rooms = 30000 # implemented in search url
 NUM_PAGES = 3 # Max number of pages to scrape for each area
 MIN_RENTAL_PERIOD = 12 # Minimum rental period = 12 months. Options: 6 (1-11 months), 12 (12-23 months), 24 (24+ months) and 0 (unlimited)
-TEST_MODE = False # when TRUE we loop over TEST_AREAS with shorter waiting times, when FALSE we loop over AREAS with longer waiting times.
+TEST_MODE = True # when TRUE we loop over TEST_AREAS with shorter waiting times, when FALSE we loop over AREAS with longer waiting times.
 
 # for each area in CPH we need a specific URL from boligportalen. We want to differentiate apartments by area in the end. Filter by max price
 AREAS = {
@@ -115,16 +122,6 @@ def check_if_apartment_is_new(apartment_url):
     else:
         return False
 
-# def message_string(data):
-#     pre =       '---------  NEW APARTMENT  ---------\n\n'
-#     title =     'Title:           ' + str(data['title'])+'\n'
-#     time =      'Timestamp:       ' + str(data['timestamp'])+'\n'
-#     size =      'Size:            ' + str(data['size']) +'\n'
-#     location =  'Location:        ' + str(data['location'])+'\n'
-#     price =     'Price:           ' + str(data['price'])+'\n\n'
-
-#     string = pre+title+time+size+location+price
-#     return string
 
 # use to updates jsons and seen_apartments
 def update_with_new_apartment(area, url, apartment_data):
@@ -253,10 +250,10 @@ def open_messenger():
 
 
     # Initialize the Chrome WebDriver
-    messenger_driver = webdriver.Chrome()
+    messenger_driver = webdriver.Chrome(service=Service(webdriver_path))
 
     messenger_driver.get("https://www.messenger.com")
-    messenger_driver.implicitly_wait(10)  # Wait for 10 seconds for the page to load
+    messenger_driver.implicitly_wait(15)  # Wait for 10 seconds for the page to load
 
     # locate elements by their xpath
     xpath_button = "//button[text()='Decline optional cookies']"
@@ -272,7 +269,7 @@ def open_messenger():
 
     login_button = messenger_driver.find_element(By.XPATH, '//*[@id="loginbutton"]')
     login_button.click()
-    messenger_driver.implicitly_wait(60)  # Wait for 60 seconds for the page to load
+    messenger_driver.implicitly_wait(90)  # Wait for 60 seconds for the page to load
 
     chat_button = messenger_driver.find_element(By.XPATH, "//span[contains(text(), 'Asker Friis Bach')]")
     chat_button.click()
@@ -351,6 +348,13 @@ if __name__ == '__main__':
     while True: 
         try:
 
+            chrome_options = Options()
+            chrome_options.add_argument("--headless")
+
+            # opens chrome and goes to boligportalen.dk / search string 
+            driver = webdriver.Chrome(service=Service(webdriver_path),options=chrome_options)
+
+
             spreadsheet, service = open_sheets()
             sorteret_fra = get_sorteret_fra(spreadsheet, service)
 
@@ -373,12 +377,7 @@ if __name__ == '__main__':
 
                 print('Fetching apartments in {}...'.format(area))
 
-                chrome_options = Options()
-                chrome_options.add_argument("--headless")
-
-                # opens chrome and goes to boligportalen.dk / search string 
-                driver = webdriver.Chrome(options=chrome_options)
-
+                
                 # Page 1 of search results
                 soup_search = scrape_and_soupify(AREA_URL)
 

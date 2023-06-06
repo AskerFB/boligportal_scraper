@@ -19,6 +19,13 @@ import re
 from pprint import pprint
 
 
+###############     FILES NEEDED      ####################
+
+# webdriver_path_file.json -> path to chrome driver
+# apartment_data -> folder with apartment data for each area. Non-existing json files are creates.
+# login_file = 'bot.json' -> username and password for messenger bot
+
+
 
 ###############      PARAMETERS       ####################
 

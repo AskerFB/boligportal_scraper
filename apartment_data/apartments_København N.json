@@ -1,0 +1,26 @@
+{
+ "https://www.boligportal.dk/lejligheder/k%C3%B8benhavn/116m2-4-vaer-id-5349486": {
+  "title": "Classic Apt near the Lakes and City",
+  "rooms": "4 v\u00e6r.",
+  "size": "116 m\u00b2",
+  "location": "K\u00f8benhavn N, \u00c5boulevard",
+  "price": "19.800\u00a0kr.",
+  "timestamp": "3. april"
+ },
+ "https://www.boligportal.dk/lejligheder/k%C3%B8benhavn/95m2-4-vaer-id-5361312": {
+  "title": "4 bedroom classic N\u00f8rrebro apartment near Metro",
+  "rooms": "4 v\u00e6r.",
+  "size": "95 m\u00b2",
+  "location": "K\u00f8benhavn N, Lundtoftegade",
+  "price": "13.000\u00a0kr.",
+  "timestamp": "25. maj"
+ },
+ "https://www.boligportal.dk/lejligheder/k%C3%B8benhavn/96m2-4-vaer-id-5349412": {
+  "title": "4 v\u00e6relses til leje midt p\u00e5 N\u00f8rrebro",
+  "rooms": "4 v\u00e6r.",
+  "size": "96 m\u00b2",
+  "location": "K\u00f8benhavn N, R\u00e5dmandsgade",
+  "price": "20.000\u00a0kr.",
+  "timestamp": "2. april"
+ }
+}

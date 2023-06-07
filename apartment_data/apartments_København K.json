@@ -62,5 +62,13 @@
   "location": "K\u00f8benhavn K, K\u00f8bmagergade",
   "price": "29.600\u00a0kr.",
   "timestamp": "24. marts"
+ },
+ "https://www.boligportal.dk/lejligheder/k%C3%B8benhavn/140m2-5-vaer-id-4718394": {
+  "title": "140 m\u00b2 lejlighed | K\u00f8benhavn K",
+  "rooms": "5 v\u00e6r.",
+  "size": "140 m\u00b2",
+  "location": "K\u00f8benhavn K, Store Kongensgade",
+  "price": "23.000\u00a0kr.",
+  "timestamp": "22. marts"
  }
 }

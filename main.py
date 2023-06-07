@@ -17,6 +17,9 @@ from google.oauth2.service_account import Credentials
 from googleapiclient import discovery
 import re
 from pprint import pprint
+import warnings
+
+warnings.filterwarnings("ignore")
 
 
 ###############     FILES NEEDED      ####################
@@ -41,7 +44,7 @@ MAX_PRICE_4rooms = 21000 # implemented in room dependent if statement
 MAX_PRICE_5rooms = 30000 # implemented in search url
 NUM_PAGES = 3 # Max number of pages to scrape for each area
 MIN_RENTAL_PERIOD = 12 # Minimum rental period = 12 months. Options: 6 (1-11 months), 12 (12-23 months), 24 (24+ months) and 0 (unlimited)
-TEST_MODE = True # when TRUE we loop over TEST_AREAS with shorter waiting times, when FALSE we loop over AREAS with longer waiting times.
+TEST_MODE = False # when TRUE we loop over TEST_AREAS with shorter waiting times, when FALSE we loop over AREAS with longer waiting times.
 
 # for each area in CPH we need a specific URL from boligportalen. We want to differentiate apartments by area in the end. Filter by max price
 AREAS = {
@@ -139,18 +142,16 @@ def update_with_new_apartment(area, url, apartment_data):
     with open('apartment_data/apartments_{}.json'.format(area), 'w+', encoding='utf-8') as fp:
         json.dump(seen_apartments.get(area, {}), fp, indent=True, ensure_ascii=True)
 
-    # print(message_string(apartment_data))
-
-    print('                                   '                     )
-    print('---------  NEW APARTMENT  ---------'                     )                
-    print('                                   '                     )
-    print('Title:           ' + str(apartment_data['title'])        )
-    print('Timestamp:       ' + str(apartment_data['timestamp'])    )
-    print('Size:            ' + str(apartment_data['size'])         )
-    print('Location:        ' + str(apartment_data['location'])     )
-    print('Price:           ' + str(apartment_data['price'])        )
-    print('URL:             ' + str(url)                            )
-    print('                                   '                     )
+    # print('                                   '                     )
+    # print('---------  NEW APARTMENT  ---------'                     )                
+    # print('                                   '                     )
+    # print('Title:           ' + str(apartment_data['title'])        )
+    # print('Timestamp:       ' + str(apartment_data['timestamp'])    )
+    # print('Size:            ' + str(apartment_data['size'])         )
+    # print('Location:        ' + str(apartment_data['location'])     )
+    # print('Price:           ' + str(apartment_data['price'])        )
+    # print('URL:             ' + str(url)                            )
+    # print('                                   '                     )
 
     return None
 
@@ -194,9 +195,10 @@ def open_sheets():
 def get_sorteret_fra(spreadsheet, service):
 
     spreadsheet_id = spreadsheet.id
-    sorteret_fra_request = service.spreadsheets().values().get(spreadsheetId=spreadsheet_id, range='Sorteret fra!F:K')
+    sorteret_fra_request = service.spreadsheets().values().get(spreadsheetId=spreadsheet_id, range='Sorteret fra!H:K')
     sorteret_fra_response = sorteret_fra_request.execute()
     values = sorteret_fra_response['values']
+    
 
     return values
 
@@ -215,7 +217,7 @@ def upload_to_sheets(area, service):
     save_response = save_request.execute()
 
     # dic with data as keys and manual comments as items.
-    data2comment = {tuple(data[5:11]): data[:5] for data in save_response['values']}
+    data2comment = {tuple(data[7:11]): data[:5] for data in save_response['values']}
     
 
     # clear current data
@@ -231,8 +233,11 @@ def upload_to_sheets(area, service):
 
         # Update the cells with values
         data2upload = ['Link', data['timestamp'], data['rooms']+' - '+data['size'], data['location'], data['price'], data['title']]
-        comment2upload = data2comment.setdefault(tuple(data2upload), ['']*5) # returns comment associated with data or 5 empty values if data is new. 5 as in between column is included
+        comment2upload = data2comment.setdefault(tuple(data2upload[2:]), ['']*5) # returns comment associated with data or 5 empty values if data is new. 5 as in between column is included
 
+        if data2upload[2:] in sorteret_fra:
+            continue
+        
         range_for_data = 'A{}:K{}'.format(num, num)
         sheet.update(range_for_data, [comment2upload + data2upload]) # update with date info
 
@@ -278,7 +283,7 @@ def open_messenger():
     login_button.click()
     messenger_driver.implicitly_wait(90)  # Wait for 60 seconds for the page to load
 
-    chat_button = messenger_driver.find_element(By.XPATH, "//span[contains(text(), 'Asker Friis Bach')]")
+    chat_button = messenger_driver.find_element(By.XPATH, "//span[contains(text(), 'Gritt, Mette, Asker')]")
     chat_button.click()
     messenger_driver.implicitly_wait(20) 
 
@@ -314,34 +319,32 @@ def from_soup_to_updated_jsons(soup):
         apartment_url = 'https://www.boligportal.dk'+apt['href']
 
         urls_scraped.append(apartment_url)
+        apartment_data, apartment_area = get_apartment_data(apt)
+        price_int = int(''.join(filter(str.isdigit, apartment_data['price'])))
 
-        if check_if_apartment_is_new(apartment_url): # check 1 : apartment listing is new
+        if apartment_area == area: # check 2 : apartment is current area
 
+            # check 3 : rooms and prices
+            if ( apartment_data['rooms'] in ['3,5 vær.','4 vær.'] and price_int < MAX_PRICE_4rooms ) or apartment_data['rooms'] in ['4,5 vær.','5 vær.']:
 
-            apartment_data, apartment_area = get_apartment_data(apt)
-            price_int = int(''.join(filter(str.isdigit, apartment_data['price'])))
+                soup_apartment = scrape_and_soupify(apartment_url)
+                timestamp = soup_apartment.select_one('.css-v49nss').text.strip() #last piece of data - timestamp
+                apartment_data['timestamp'] = timestamp
 
-            if apartment_area == area: # check 2 : apartment is current area
-
-                # check 3 : rooms and prices
-                if ( apartment_data['rooms'] in ['3,5 vær.','4 vær.'] and price_int < MAX_PRICE_4rooms ) or apartment_data['rooms'] in ['4,5 vær.','5 vær.']:
-
-                    soup_apartment = scrape_and_soupify(apartment_url)
-                    timestamp = soup_apartment.select_one('.css-v49nss').text.strip() #last piece of data - timestamp
-                    apartment_data['timestamp'] = timestamp
-
-                    data2upload = [
+                data2upload = [
                         'Link', 
                         apartment_data['timestamp'], 
                         apartment_data['rooms']+' - '+apartment_data['size'], 
                         apartment_data['location'], apartment_data['price'], 
                         apartment_data['title']
-                        ]
+                    ]
 
 
-                    if data2upload not in sorteret_fra: # check 4 : have we discarded it manually?
+                if data2upload[2:] not in sorteret_fra: # check 4 : have we discarded it manually?
                         
-                        update_with_new_apartment(area, apartment_url, apartment_data)
+                    update_with_new_apartment(area, apartment_url, apartment_data)
+
+                    if check_if_apartment_is_new(apartment_url): # check 1 : apartment listing is new
                         send_messenger_text(area, apartment_url)
 
 
@@ -350,7 +353,7 @@ def from_soup_to_updated_jsons(soup):
 ####################    CODE STARTS HERE    #########################
 
 
-
+counter = 0
 if __name__ == '__main__':
     while True: 
         try:
@@ -374,7 +377,12 @@ if __name__ == '__main__':
             else:
                 search_areas = AREAS
                 waiting_time_area = 30
-                waiting_time_refresh = 120
+                if counter == 9:
+                    waiting_time_refresh = 15*60
+                    counter = 0
+                else:
+                    waiting_time_refresh = 3*60
+                    counter += 1
 
             for area, AREA_URL in search_areas.items():
 

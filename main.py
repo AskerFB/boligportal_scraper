@@ -341,20 +341,23 @@ def from_soup_to_updated_jsons(soup):
 
 
                 if data2upload[2:] not in sorteret_fra: # check 4 : have we discarded it manually?
-                        
-                    update_with_new_apartment(area, apartment_url, apartment_data)
+
+                    ############# MESSENGER #####################
 
                     if check_if_apartment_is_new(apartment_url): # check 1 : apartment listing is new and code managed to open messenger
-
                         try:
                             messenger_driver = open_messenger()
                             send_messenger_text(area, apartment_url)
                         except:
                             print('CANT OPEN MESSENGER')
 
+                    ################################################
 
-                        
 
+                    update_with_new_apartment(area, apartment_url, apartment_data)
+
+
+                    
 ####################    CODE STARTS HERE    #########################
 
 
@@ -396,16 +399,11 @@ if __name__ == '__main__':
 
                 print('Fetching apartments in {}...'.format(area))
 
-                
                 # Page 1 of search results
                 soup_search = scrape_and_soupify(AREA_URL)
 
-
-
-
+                # EXECUTE MAIN FUNCTION
                 from_soup_to_updated_jsons(soup_search)
-
-
 
                 # IN CASE OF MORE PAGES
                 # Check if pagination element exists and get the total number of pages (we maximally go through NUM_PAGES pages)
@@ -417,12 +415,12 @@ if __name__ == '__main__':
                         page_url = AREA_URL+'?offset={}'.format(18*page)
 
                         soup_page = scrape_and_soupify(page_url)
+
+                        # EXECUTE MAIN FUNCTION
                         from_soup_to_updated_jsons(soup_page)
 
 
                 remove_old_apartments(area, urls_scraped)
-
-
 
                 ############# GOOGLE SHEETS #####################
 
@@ -432,7 +430,6 @@ if __name__ == '__main__':
                     sleep(1)
 
                 ################################################
-
 
             driver.quit()
             # time in between code executions = 10 sec. Change to 60 sec when done.

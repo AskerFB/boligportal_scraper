@@ -344,7 +344,8 @@ def from_soup_to_updated_jsons(soup):
                         
                     update_with_new_apartment(area, apartment_url, apartment_data)
 
-                    if check_if_apartment_is_new(apartment_url): # check 1 : apartment listing is new
+                    if check_if_apartment_is_new(apartment_url) and messenger_isopen: # check 1 : apartment listing is new and code managed to open messenger
+
                         send_messenger_text(area, apartment_url)
 
 
@@ -368,7 +369,14 @@ if __name__ == '__main__':
             spreadsheet, service = open_sheets()
             sorteret_fra = get_sorteret_fra(spreadsheet, service)
 
-            messenger_driver = open_messenger()
+
+            try:
+                messenger_driver = open_messenger()
+                messenger_isopen = True
+            except:
+                print('CANT OPEN MESSENGER')
+                messenger_isopen = False
+
 
             if TEST_MODE:
                 search_areas = TEST_AREAS

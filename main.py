@@ -44,7 +44,7 @@ MAX_PRICE_4rooms = 21000 # implemented in room dependent if statement
 MAX_PRICE_5rooms = 30000 # implemented in search url
 NUM_PAGES = 3 # Max number of pages to scrape for each area
 MIN_RENTAL_PERIOD = 12 # Minimum rental period = 12 months. Options: 6 (1-11 months), 12 (12-23 months), 24 (24+ months) and 0 (unlimited)
-TEST_MODE = False # when TRUE we loop over TEST_AREAS with shorter waiting times, when FALSE we loop over AREAS with longer waiting times.
+TEST_MODE = True # when TRUE we loop over TEST_AREAS with shorter waiting times, when FALSE we loop over AREAS with longer waiting times.
 
 # for each area in CPH we need a specific URL from boligportalen. We want to differentiate apartments by area in the end. Filter by max price
 AREAS = {
@@ -65,7 +65,7 @@ AREAS = {
 seen_apartments = {} 
 
 TEST_AREAS = {
-    'Valby':            'https://www.boligportal.dk/lejeboliger/k%C3%B8benhavn/4-5-v%C3%A6relser/valby/?max_monthly_rent={}&min_rental_period={}'.format(MAX_PRICE_5rooms, MIN_RENTAL_PERIOD)
+    'København NV':     'https://www.boligportal.dk/lejeboliger/k%C3%B8benhavn/4-5-v%C3%A6relser/k%C3%B8benhavn-nv/?max_monthly_rent={}&min_rental_period={}'.format(MAX_PRICE_5rooms, MIN_RENTAL_PERIOD)
 }
 
 
@@ -254,7 +254,8 @@ def upload_to_sheets(area, service):
 
 ####################    MESSENGER FUNCTIONS     ########################
 
-def open_messenger():
+
+def open_messenger_and_send_text(area, url):
 
     # username and password saved in json file.
     login_file = 'bot.json'
@@ -284,25 +285,34 @@ def open_messenger():
     login_button.click()
     messenger_driver.implicitly_wait(90)  # Wait for 60 seconds for the page to load
 
-    chat_button = messenger_driver.find_element(By.XPATH, "//span[contains(text(), 'Gritt, Mette, Asker')]")
+    chat_xpath = '/html/body/div[1]/div/div/div/div[2]/div/div/div/div[1]/div[1]/div[1]/div/div[2]/div/div/div/div/div[3]/div/div/div/div/div[2]/div/div[1]/div/div[1]/a'
+
+    chat_button = messenger_driver.find_element(By.XPATH, chat_xpath)
     chat_button.click()
-    messenger_driver.implicitly_wait(20) 
+    messenger_driver.implicitly_wait(40)
 
-    return messenger_driver
+    text = 'Hej med jer, der er en ny lejlighed i {}.'.format(area)+' hej hej.      Link: '
+
+    message_xpath = '/html/body/div[1]/div/div/div/div[2]/div/div/div/div[1]/div[1]/div[2]/div/div/div/div/div/div[1]/div[2]/div/div/div[2]/div/div/div[4]/div[2]/div/div/div[1]'
 
 
-def send_messenger_text(area, url):
+    try:
 
-    text = 'Hej med jer, der er en ny lejlighed i {}.'.format(area)+' hej hej.'
+        message_input = messenger_driver.find_element(By.XPATH, message_xpath)
+        message_input.send_keys(text)
+        message_input.send_keys(url)
+        message_input.send_keys(Keys.ENTER)
+        sleep(10)
 
-    message_input = messenger_driver.find_element(By.CSS_SELECTOR, 'div[contenteditable="true"][aria-label="Message"]')
-    message_input.send_keys(text)
-    message_input.send_keys(Keys.ENTER)
+    except Exception as err:
+        print('Error:', err)
+        traceback.print_exc() 
+  
 
-    message_input.send_keys(url)
-    message_input.send_keys(Keys.ENTER)
 
     return None
+
+
 
 
 
@@ -347,10 +357,10 @@ def from_soup_to_updated_jsons(soup):
 
                     if check_if_apartment_is_new(apartment_url): # check 1 : apartment listing is new and code managed to open messenger
                         try:
-                            messenger_driver = open_messenger()
-                            send_messenger_text(area, apartment_url)
-                        except:
-                            print('CANT OPEN MESSENGER')
+                            open_messenger_and_send_text(area, apartment_url)
+                        except Exception as err:
+                            print('Error:', err)
+                            traceback.print_exc() 
 
                     ################################################
 

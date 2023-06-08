@@ -44,7 +44,7 @@ MAX_PRICE_4rooms = 21000 # implemented in room dependent if statement
 MAX_PRICE_5rooms = 30000 # implemented in search url
 NUM_PAGES = 3 # Max number of pages to scrape for each area
 MIN_RENTAL_PERIOD = 12 # Minimum rental period = 12 months. Options: 6 (1-11 months), 12 (12-23 months), 24 (24+ months) and 0 (unlimited)
-TEST_MODE = True # when TRUE we loop over TEST_AREAS with shorter waiting times, when FALSE we loop over AREAS with longer waiting times.
+TEST_MODE = False # when TRUE we loop over TEST_AREAS with shorter waiting times, when FALSE we loop over AREAS with longer waiting times.
 
 # for each area in CPH we need a specific URL from boligportalen. We want to differentiate apartments by area in the end. Filter by max price
 AREAS = {

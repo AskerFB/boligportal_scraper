@@ -52,6 +52,7 @@ AREAS = {
     'København V':      'https://www.boligportal.dk/lejeboliger/k%C3%B8benhavn/4-5-v%C3%A6relser/k%C3%B8benhavn-v/?max_monthly_rent={}&min_rental_period={}'.format(MAX_PRICE_5rooms, MIN_RENTAL_PERIOD),
     'København N':      'https://www.boligportal.dk/lejeboliger/k%C3%B8benhavn/4-5-v%C3%A6relser/k%C3%B8benhavn-n/?max_monthly_rent={}&min_rental_period={}'.format(MAX_PRICE_5rooms, MIN_RENTAL_PERIOD),
     'København K':      'https://www.boligportal.dk/lejeboliger/k%C3%B8benhavn/4-5-v%C3%A6relser/k%C3%B8benhavn-k/?max_monthly_rent={}&min_rental_period={}'.format(MAX_PRICE_5rooms, MIN_RENTAL_PERIOD), 
+    'København NV':     'https://www.boligportal.dk/lejeboliger/k%C3%B8benhavn/4-5-v%C3%A6relser/k%C3%B8benhavn-nv/?max_monthly_rent={}&min_rental_period={}'.format(MAX_PRICE_5rooms, MIN_RENTAL_PERIOD), 
     'Frederiksberg':    'https://www.boligportal.dk/lejeboliger/k%C3%B8benhavn/4-5-v%C3%A6relser/frederiksberg/?max_monthly_rent={}&min_rental_period={}'.format(MAX_PRICE_5rooms, MIN_RENTAL_PERIOD), 
     'Frederiksberg C':  'https://www.boligportal.dk/lejeboliger/k%C3%B8benhavn/4-5-v%C3%A6relser/frederiksberg-c/?max_monthly_rent={}&min_rental_period={}'.format(MAX_PRICE_5rooms, MIN_RENTAL_PERIOD),
     'Valby':            'https://www.boligportal.dk/lejeboliger/k%C3%B8benhavn/4-5-v%C3%A6relser/valby/?max_monthly_rent={}&min_rental_period={}'.format(MAX_PRICE_5rooms, MIN_RENTAL_PERIOD)
